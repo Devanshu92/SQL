@@ -1,0 +1,112 @@
+/* Problem Statement - Give two tables A and B, find the number of records for Inner Join, Left Join, Right Join, Full Outer Join and Cross Join */
+
+-- Input 
+
+ Table A
+
+id     name
+1     X
+2     Y
+3     Z
+4     P
+5     Q
+1     X
+2     Y
+3     Z
+
+Table B
+
+id     name
+1     X
+2     Y
+1     X
+4     P
+5     Q
+6     R
+
+Q1 . 
+What is output of (join on column ID)
+A Join B
+A Left Join B
+A RIght Join B
+A Full Outer Join B
+A Cartesian Product B
+
+---- SOLUTION --------------
+
+DROP TABLE IF EXISTS A; 
+CREATE TABLE A (
+   ID INT,
+   NAME VARCHAR (20) 
+);
+
+DROP TABLE IF EXISTS B; 
+CREATE TABLE B (
+   ID INT,
+   NAME VARCHAR (20) 
+);
+
+INSERT INTO A VALUES
+(1,'X'), 
+(2,'Y'),
+(3,'Z'),
+(4,'P'),
+(5,'Q'),
+(1,'X'),
+(2,'Y'),
+(3,'Z');
+
+INSERT INTO B VALUES
+(1,'X'),
+(2,'Y'),
+(1,'X'),
+(4,'P'),
+(5,'Q'),
+(6,'R'); 
+
+SELECT A.NAME,COUNT(*) 
+FROM A INNER JOIN B ON A.ID = B.ID  
+GROUP BY 1 
+-- ANS - 8 (4(X)+2(Y)+1(P)+1(Q)))
+
+SELECT COUNT(*) 
+FROM A LEFT JOIN B ON A.ID = B.ID  
+-- ANS - 10 , 4X,1Y,1Q,1R,1P,2Z
+
+SELECT COUNT(*) 
+FROM A RIGHT JOIN B ON A.ID = B.ID 
+-- ANS - 9, 4X,2Y,1P,1Q,1R
+
+SELECT COUNT(*)
+FROM A FULL OUTER JOIN B ON A.ID = B.ID
+-- ANS - 4X,2Y,1P,1Q,2Z,1R
+
+Follow-up question, will output change,if there is another row with id having Null value in both TableA as well as TableB.
+Answer: No impact on A JOIN B
+ 1 Row Added in A Left Join B and A Right Join B, 
+ 2 rows added in A Full Outer Join B
+and number of rows will change for A Cross Join B to 63
+
+--- Solution ---- 
+INSERT INTO A VALUES
+(NULL,NULL);
+
+INSERT INTO B VALUES
+(NULL,NULL); 
+
+
+SELECT COUNT(*) 
+FROM A INNER JOIN B ON A.ID = B.ID  
+-- ANS 8 NO CHANGE IN OUTPUT AS INNER JOIN DOESN'T TAKE INTO CONSIDERATION NULLS
+
+SELECT COUNT(*)
+FROM A LEFT JOIN B ON A.ID = B.ID 
+-- ANS 11 , 1 NULL VALUE FROM LEFT TABLE IS CONSIDERED 
+
+SELECT COUNT(*)
+FROM A RIGHT JOIN B ON A.ID = B.ID 
+-- ANS 10 , 1 NULL VALUE FROM LEFT TABLE IS CONSIDERED
+ 
+SELECT COUNT(*)
+FROM A FULL OUTER JOIN B ON A.ID = B.ID
+-- ANS - 4X,2Y,1P,1Q,2Z,1R,2 NULLS
