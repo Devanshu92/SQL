@@ -1,0 +1,11 @@
+/* HOW TO COUNT NUMBER OF VOWEL IN A TEXT IN SQL 
+For Example : Devanshu word has 3 vowel
+*/
+
+ select
+    len('Devanshu') as len_char,
+    len(
+        replace(replace(replace(replace(replace(
+            lower('Devanshu'), 'a', ''), 'e', ''), 'i', ''), 'o', ''), 'u', '')
+    ) as len_char_without_vowel,
+    len_char-len_char_without_vowel as vowel_count
