@@ -1,0 +1,48 @@
+/* In Car racing event, all deatils about race is stored in below table 
+
+Input : 
+Table Driver
++------+-----------+
+| name | time(sec) |
++------+-----------+
+| andy | 101       |
+| bob  | 103       |
+|cedric| 104       |
+| dave | 104       |
+| eric | 108       |
++-----------+------+
+
+Output : 
+name      time      rank      behindname      timediff 
+ andy     101            1     bob                 2
+ bob      103            2     cedric              1
+ cedric   104            3     dave                0
+ dave     104            3     eric                4
+ eric     108            4     ----                —
+ */
+ 
+Solution : 
+
+DROP TABLE IF EXISTS DRIVER ;  
+CREATE TABLE DRIVER
+(
+NAME VARCHAR,
+TIME INT
+);
+
+INSERT INTO DRIVER VALUES
+('ANDY',101),
+('BOB',103),
+('CEDRIC',104),
+('DAVE',104),
+('ERIC',108); 
+
+
+SELECT 
+NAME,
+TIME,
+DENSE_RANK() OVER(ORDER BY TIME ASC) AS RNK,
+LAG(NAME,1) OVER(ORDER BY TIME ASC) AS BEHIND_NAME,
+LEAD(TIME,1) OVER(ORDER BY TIME ASC) - TIME AS TIMEDIFF
+FROM 
+DRIVER
