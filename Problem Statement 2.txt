@@ -1,0 +1,46 @@
+/* I have a table which has two columns and data looks like below.
+
+TableA
+
+Col1 col2
+A 4
+D 3
+B 2
+C 1
+
+output
+Col1 col2
+A 1
+B 2
+C 3
+D 4
+*/
+
+DROP TABLE IF EXISTS E; 
+CREATE TABLE E
+(
+ALPHABET VARCHAR,
+NON_ALPHABET INT
+);
+
+INSERT INTO E VALUES
+('A',2),
+('B',1),
+('C',4),
+('D',3);
+
+Solution : 
+WITH TEMPA AS
+(
+SELECT NON_ALPHABET, ROW_NUMBER() OVER(ORDER BY NON_ALPHABET) AS ID
+FROM E
+),
+TEMPB AS
+(
+SELECT ALPHABET, ROW_NUMBER() OVER(ORDER BY ALPHABET) AS ID
+FROM E 
+)
+
+SELECT A.ALPHABET, B.NON_ALPHABET 
+FROM TEMPA A INNER JOIN TEMPB B 
+ON A.ID = B.ID
