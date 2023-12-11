@@ -1,0 +1,55 @@
+/* How can we Transpose a table using SQL( changing rows to column or Vice-Versa)? 
+
+Input : 
+
+employee_id    salary_component_id    salary_component_desc    Value    month
+1    1    salary    2000    2015-09
+1    2    bonus    100    2015-09
+1    3    indennity    250    2015-09
+1    1    salary    2000    2015-10
+1    2    bonus    0    2015-10
+1    3    indennity    150    2015-10
+2    1    salary    1500    2015-09
+2    2    bonus    0    2015-09
+2    3    indennity    50    2015-09
+
+Output : 
+employee_id    month    salary    bonus    indennity
+1    2015-09    2000    100    250
+1    2015-10    2000    0    150
+2    2015-09    1500    0    50
+
+*/
+
+DROP TABLE IF EXISTS EMPLOYEE; 
+CREATE TABLE EMPLOYEE 
+(
+EMPLOYEE_ID INT,
+SALARY_COMPONENT_ID INT,
+SALARY_COMPONENT_DESC VARCHAR,
+VALUE INT,
+MONTH VARCHAR
+);
+
+INSERT INTO EMPLOYEE VALUES
+(1,1,'SALARY',2000,'2015-09'),
+(1,2,'BONUS',100,'2015-09'),
+(1,3,'INDENNITY',250,'2015-09'),
+(1,1,'SALARY',2000,'2015-10'),
+(1,2,'BONUS',0,'2015-10'),
+(1,3,'INDENNITY',150,'2015-10'),
+(2,1,'SALARY',1500,'2015-09'),
+(2,2,'BONUS',0,'2015-09'),
+(2,3,'INDENNITY',50,'2015-09');
+
+
+
+SELECT EMPLOYEE_ID,
+MONTH,
+SUM(CASE WHEN SALARY_COMPONENT_DESC = 'SALARY' THEN VALUE END) AS SALARY,
+SUM(CASE WHEN SALARY_COMPONENT_DESC = 'BONUS' THEN VALUE END) AS BONUS,
+SUM(CASE WHEN SALARY_COMPONENT_DESC = 'INDENNITY' THEN VALUE END) AS INDENNITY 
+FROM 
+EMPLOYEE
+GROUP BY 
+1,2
