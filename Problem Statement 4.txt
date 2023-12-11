@@ -2,6 +2,8 @@
 For Example : Devanshu word has 3 vowel
 */
 
+Solution : 
+
  select
     len('Devanshu') as len_char,
     len(
