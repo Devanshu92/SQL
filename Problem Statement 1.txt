@@ -1,0 +1,41 @@
+/* If I have a table with follower and followee (where the follower follows the followee), how do I return a table of mutual follows? 
+
+Input : 
+follower|followee
+Pier|John
+Pier|Sinead
+John| Pier
+
+Output:
+follower|followee
+-|-
+Pier|John
+John|Pier
+*/
+
+DROP TABLE IF EXISTS C; 
+CREATE TABLE C (
+FOLLOWER VARCHAR(20),
+FOLLOWEE VARCHAR(20)
+); 
+
+INSERT INTO C VALUES
+('PIER','JOHN'),
+('PIER','SINEAD'),
+('JOHN','PIER');
+
+
+Solution : 
+
+SELECT 
+DISTINCT A.FOLLOWER,A.FOLLOWEE
+FROM C AS A 
+INNER JOIN C AS B ON A.FOLLOWER = B.FOLLOWEE 
+AND A.FOLLOWEE = B.FOLLOWER
+
+-- Alternative Approach
+
+SELECT FOLLOWER, FOLLOWEE FROM C
+INTERSECT
+SELECT FOLLOWEE, FOLLOWER FROM C 
+
