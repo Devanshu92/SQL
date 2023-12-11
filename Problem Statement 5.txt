@@ -1,0 +1,72 @@
+/*
+Pier is a teacher in a middle school and he has a table seat storing students' names 
+and their corresponding seat ids. The column id is continuous increment; 
+Pier wants to change seats for the adjacent students, write a SQL query to do that for him.
+
+Input : 
+Table Seat:
++---------+----------+
+|    id   | student  |
++---------+----------+
+|    1    | Abbot    |
+|    2    | Doris    |
+|    3    | Emerson  |
+|    4    | Green    |
+|    5    | Jeames   |
+
+Output : 
++---------+---------+
+|    id   | student |
++---------+---------+
+|    1    | Doris   |
+|    2    | Abbot   |
+|    3    | Green   |
+|    4    | Emerson |
+|    5    | Jeames  |
++---------+---------+
+*/
+
+DROP TABLE IF EXISTS SEAT;
+CREATE TABLE SEAT
+(
+ID INT,
+STUDENT VARCHAR
+); 
+
+INSERT INTO SEAT VALUES
+(1,'ABBOT'),
+(2,'DORIS'),
+(3,'EMERSON'),
+(4,'GREEN'),
+(5,'JEAMES'); 
+
+
+Solution : 
+Using Join Solution - 
+
+SELECT 
+A.ID AS ORIGINAL_ID,
+A.STUDENT AS ORIGINAL_STUDENT,
+B.ID AS NEXT_ID,
+B.STUDENT AS NEXT_STUDENT,
+A.ID%2 AS MODULE,
+C.ID AS PRV_ID,
+C.STUDENT AS PRV_STUDENT,
+CASE WHEN A.ID%2 = 0 THEN C.STUDENT ELSE NVL(B.STUDENT,A.STUDENT) END AS FINAL_OUTPUT
+FROM SEAT A 
+LEFT JOIN SEAT B 
+ON A.ID = B.ID-1 -- Joins A.ID = 1 with B.ID = 2 as 2-1 = 1 (Acts like a lead function)
+LEFT JOIN SEAT C
+ON A.ID = C.ID+1 -- joins A.ID = 2 with C.ID = 1 as 1+1 = 2 (Acts like a lag function)
+
+Optimal Solution : 
+
+SELECT ID, FINAL_STUDENT_POSITION AS STUDENT
+FROM 
+(
+SELECT ID,STUDENT
+,LEAD(STUDENT,1) OVER(ORDER BY ID) AS NEXT_STUDENT
+,LAG(STUDENT,1) OVER(ORDER BY ID) AS PRV_STUDENT
+,CASE WHEN ID%2 = 1 THEN NVL(NEXT_STUDENT,STUDENT) ELSE NVL(PRV_STUDENT,STUDENT) END AS FINAL_STUDENT_POSITION 
+FROM SEAT 
+) ; 
