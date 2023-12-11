@@ -21,6 +21,8 @@ employee_id    month    salary    bonus    indennity
 
 */
 
+Solution : 
+
 DROP TABLE IF EXISTS EMPLOYEE; 
 CREATE TABLE EMPLOYEE 
 (
