@@ -1,0 +1,55 @@
+/*
+All student and their cource gradig are stored in below Student table
++---------+--------+-------+
+| name | course | grade |
++---------+--------+-------+
+| XXX | CS | A |
+| XXX | MATH | A |
+| XXX | IT | B |
+| YYY | CS | C |
+| YYY | MATH | F |
+| YYY | IT | F |
+| ZZZ | CS | B |
+| ZZZ | MATH | B |
+| ZZZ | IT | A |
++---------+--------+-------+
+
+-- Write a query to display result in below format
+
+Output : 
++---------+--------+-------+--------+
+| name | CS | IT | MATH |
++---------+--------+-------+--------+
+| XXX | A | A | B |
+| YYY | C | F | F |
+| ZZZ | B | B | A |
++---------+--------+-------+--------+
+*/
+
+Solution : 
+DROP TABLE IF EXISTS GRADES;
+CREATE TABLE GRADES
+(
+NAME VARCHAR,
+COURSE VARCHAR,
+GRADE VARCHAR
+);
+
+INSERT INTO GRADES VALUES
+('XXX','CS','A'),
+('XXX','MATH','A'),
+('XXX','IT','B'),
+('YYY','CS','C'),
+('YYY','MATH','F'),
+('YYY','IT','F'),
+('ZZZ','CS','B'),
+('ZZZ','MATH','B'),
+('ZZZ','IT','A');
+
+
+SELECT NAME,
+MAX(CASE WHEN COURSE = 'CS' THEN GRADE END) AS  CS,
+MAX(CASE WHEN COURSE = 'IT' THEN GRADE END) AS IT,
+MAX(CASE WHEN COURSE = 'MATH' THEN GRADE END) AS MATH
+FROM GRADES
+GROUP BY 1 
