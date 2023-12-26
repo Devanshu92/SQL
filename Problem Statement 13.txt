@@ -1,0 +1,121 @@
+/* 
+Table - ORDERS
++ — — — — — -  + — — — — — +— — +   — — -+ — — — — +------
+marketplace_id |customer_id|ASIN|quantity|order_date
+              1|	123| A22|	1|	2/1/2021
+              3|	241| T14|	1|	1/14/2021
+              1|	123| C13|	2|	11/17/2020
+              1|	443| A22|	3|	12/7/2020
+              1|	443| H59|	1|	1/8/2021
+              1|	768| Q30|	0|	1/29/2021
+              1|	943| P12|	1|	1/3/2021
++ — — — — — -  + — — — — — +— — +   — — -+ — — — — +------
+
+Table - ASINS
+
++ — — — — ----+ — — —+— — — — — -+ — — — —---------+--------------------------+
+marketplace_id|	asin|	      gl|has_bullet_points|	has_customer_reviews
+             1|  A22|	   books|	         Y|	Y
+             1|	 T14|electronics|	         Y|	N
+             3|	 B20|	   books|	         Y|	
+             1|	 C13|	   games|	         N|	N
+             1|	 Q72|	   games|	         N|	Y
+             4|	 A22|electronics|	         Y|	Y
+             1|	 T87|	   music|	         N|	Y
+             3|	 A22|	   books|	         Y|	Y
+             1|	 H59|	   books|	          |	N
+             1|	 Q30|	   games|	         Y|	Y
+             1|	 P12|	    toys|	          |	Y
++ — — — — ----+ — — —+— — — — — -+ — — — —---------+--------------------------+
+
+
+QUESTIONS				
+1. List of all GLs that are available in the US (marketplace_id = 1) but have not sold any units (Joining, Aggregation, Null Values Treatment)
+2. For each GL the top selling ASIN and how many items the ASIN has sold in total (Joining, Aggregation, Window Functions)
+3. For each customer get the last ASIN they have purchased in 2021 (Window function, Subqueries/CTEs, Date Handling)
+*/
+
+DROP TABLE IF EXISTS ORDERS;
+CREATE TABLE ORDERS
+(
+MARKETPLACE_ID INTEGER,
+CUSTOMER_ID INTEGER,
+ASIN VARCHAR,
+QUANTITY INTEGER,
+ORDER_DATE DATE
+);
+
+INSERT INTO ORDERS VALUES
+(1,123,'A22',1,'02/01/2021'),
+(3,241,'T14',1,'01/14/2021'),
+(1,123,'C13',2,'11/17/2020'),
+(1,443,'A22',3,'12/07/2020'),
+(1,443,'H59',1,'01/08/2021'),
+(1,768,'Q30',0,'01/29/2021'),
+(1,943,'P12',1,'01/03/2021');
+
+
+DROP TABLE IF EXISTS ASINS;
+CREATE TABLE ASINS
+(
+MARKETPLACE_ID INTEGER,
+ASIN VARCHAR,
+GL VARCHAR,
+HAS_BULLET_POINTS VARCHAR,
+HAS_CUSTOMER_REVIEWS VARCHAR
+);
+
+INSERT INTO ASINS VALUES
+(1,'A22','BOOKS','Y','Y'),
+(1,'T14','ELECTRONICS','Y','N'),
+(3,'B20','BOOKS','Y',NULL),
+(1,'C13','GAMES','N','N'),
+(1,'Q72','GAMES','N','Y'),
+(4,'A22','ELECTRONICS','Y','Y'),
+(1,'T87','MUSIC','N','Y'),
+(3,'A22','BOOKS','Y','Y'),
+(1,'H59','BOOKS',NULL,'N'),
+(1,'Q30','GAMES','Y','Y'),
+(1,'P12','TOYS',NULL,'Y');
+
+-- SOLUTION 1 --
+SELECT 
+DISTINCT GL
+FROM ASINS ASI
+LEFT JOIN ORDERS ORD
+ON ORD.MARKETPLACE_ID = ASI.MARKETPLACE_ID
+AND ORD.ASIN = ASI.ASIN
+WHERE ASI.MARKETPLACE_ID = 1 
+AND NVL(ORD.QUANTITY,0) = 0 --- NOT_SOLD 
+
+-- SOLUTION 2 --
+WITH TEMP AS
+(
+SELECT 
+ASI.GL,ASI.ASIN,SUM(ORD.QUANTITY) AS TOTAL_ORDERS,
+ROW_NUMBER() OVER(PARTITION BY GL ORDER BY TOTAL_ORDERS DESC) AS RNK
+FROM ASINS ASI
+INNER JOIN ORDERS ORD
+ON ORD.MARKETPLACE_ID = ASI.MARKETPLACE_ID
+AND ORD.ASIN = ASI.ASIN
+GROUP BY 1,2
+)
+
+SELECT GL,ASIN,TOTAL_ORDERS
+FROM TEMP
+WHERE RNK = 1 
+
+-- SOLUTION 3 ---
+SELECT CUSTOMER_ID,ASIN
+FROM
+(
+SELECT 
+CUSTOMER_ID,
+ASIN,
+ROW_NUMBER() OVER(PARTITION BY CUSTOMER_ID ORDER BY ORDER_DATE DESC) AS RNK
+FROM  ORDERS  
+WHERE
+EXTRACT(YEAR FROM ORDER_DATE) = 2021
+)
+WHERE RNK = 1 
+
