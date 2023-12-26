@@ -1,0 +1,71 @@
+/* 
+Each day many people visit the Coliseum and the stats are saved in a table as following columns: id, visit_date, people
+Please write a query to display the records which have 3 or more consecutive rows and the amount of people more than 100(inclusive).
+
++------+------------+-----------+
+| id   | visit_date | people    |
++------+------------+-----------+
+| 1    | 2017-01-01 | 10        |
+| 2    | 2017-01-02 | 109       |
+| 3    | 2017-01-03 | 150       |
+| 4    | 2017-01-04 | 99        |
+| 5    | 2017-01-05 | 145       |
+| 6    | 2017-01-06 | 1455      |
+| 7    | 2017-01-07 | 199       |
+| 8    | 2017-01-08 | 188       |
++------+------------+-----------+
+*/
+
+/*
+Output
+
++------+------------+-----------+
+| id   | visit_date | people    |
++------+------------+-----------+
+| 5    | 2017-01-05 | 145       |
+| 6    | 2017-01-06 | 1455      |
+| 7    | 2017-01-07 | 199       |
+| 8    | 2017-01-08 | 188       |
++------+------------+-----------+
+*/
+
+Solution : 
+DROP TABLE IF EXISTS VISIT;
+CREATE TABLE VISIT
+(
+ID INTEGER,
+VISIT_DATE DATE,
+PEOPLE  INTEGER
+);
+
+INSERT INTO VISIT VALUES
+(1,'2017-01-01',10),
+(2,'2017-01-02',109),
+(3,'2017-01-03',150),
+(4,'2017-01-04',99),
+(5,'2017-01-05',145),
+(6,'2017-01-06',1455),
+(7,'2017-01-07',199),
+(8,'2017-01-08',188);
+
+
+SELECT 
+ID,
+VISIT_DATE,
+PEOPLE
+FROM
+(
+SELECT ID,VISIT_DATE,PEOPLE,
+LAG(PEOPLE,1) OVER(ORDER BY ID) AS PRV_PEOPLE,
+LEAD(PEOPLE,1) OVER(ORDER BY ID) AS NXT_PEOPLE,
+LAG(PEOPLE,2) OVER(ORDER BY ID) AS PRV_2_PEOPLE,
+LEAD(PEOPLE,2) OVER(ORDER BY ID) AS NXT_2_PEOPLE
+FROM 
+VISIT
+)
+WHERE
+(PEOPLE >= 100 AND PRV_PEOPLE >= 100 AND NXT_PEOPLE >= 100) -- CURRENT , PREVIOUS AND NEXT GREATER THAN 100
+OR
+(PEOPLE >= 100 AND PRV_PEOPLE >= 100 AND PRV_2_PEOPLE >= 100) -- CURRENT, PREVIOUS AND 2ND_PREVIOUS GREATER THAN 100
+OR
+(PEOPLE >= 100 AND NXT_PEOPLE >= 100 AND NXT_2_PEOPLE >= 100) -- CURRENT, NEXT AND 2ND_NEXT GREATHER THAN 100 
