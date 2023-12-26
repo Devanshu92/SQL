@@ -1,0 +1,90 @@
+/*
+Table - Queue has the information about all people waiting for an elevator. 
+The person_id and turn columns will contain all numbers from 1 to n, where n is the number of rows in the table.
+The maximum weight the elevator can hold is 1000.
+
+Table - Queue 
+— + — — — — — -+ — — — — — — — — — -+ — — — — + — — — +
+— | person_id | person_name | weight | turn |
+— + — — — — — -+ — — — — — — — — — -+ — — — — + — — — +
+— | 5 | George Washington | 250 | 1 |
+— | 3 | John Adams | 350 | 2 |
+— | 6 | Thomas Jefferson | 400 | 3 |
+— | 2 | Will Johnliams | 200 | 4 |
+— | 4 | Thomas Jefferson | 175 | 5 |
+— | 1 | James Elephant | 500 | 6 |
+— + — — — — — -+ — — — — — — — — — -+ — — — — + — — — +
+
+
+Write an SQL query to find the person_name of the last person who will fit in the elevator without exceeding the weight limit.
+It is guaranteed that the person who is first in the queue can fit in the elevator.
+The query result format is in the following example:
+Queue table
+
+Result table
++-------------------+
+| person_name |
++-------------------+
+| Thomas Jefferson |
++-------------------+
+*/
+
+DROP TABLE IF EXISTS QUEUE;
+CREATE TABLE QUEUE
+(
+PERSON_ID INTEGER,
+PERSON_NAME VARCHAR,
+WEIGHT INTEGER,
+TURN INTEGER
+); 
+
+
+INSERT INTO QUEUE VALUES
+(5,'GEORGE WASHINGTON',250,1),
+(3,'JOHN ADAMS',350,2),
+(6,'THOMAS JEFFERSON',400,3),
+(2,'WILL JOHNLIAMS',200,4),
+(4,'THOMAS JEFFERSON',175,5),
+(1,'JAMES ELEPHANT',500,6);
+
+---- SOLUTION 1-------------
+
+SELECT PERSON_NAME 
+FROM QUEUE 
+WHERE TURN = 
+(
+SELECT MAX(ORIGINAL_TURN) 
+FROM 
+(
+SELECT 
+Q1.TURN AS ORIGINAL_TURN,
+Q1.WEIGHT AS ORIGINAL_WEIGHT,
+SUM(Q2.WEIGHT) AS RUNNING_WEIGHT
+FROM QUEUE Q1
+INNER JOIN QUEUE Q2
+ON Q1.TURN >= Q2.TURN -- JOIN TO GET RUNNING_SUM
+GROUP BY 1,2
+HAVING SUM(Q2.WEIGHT) <= 1000
+)
+)
+
+-------- SOLUTION - 2 ------------
+WITH FINAL_TURN AS
+(
+SELECT 
+MAX(TURN) AS TURN 
+FROM 
+(
+SELECT 
+TURN,
+WEIGHT,
+PERSON_NAME,
+SUM(WEIGHT) OVER(ORDER BY TURN ROWS UNBOUNDED PRECEDING) AS RUNNING_WEIGHT,
+CASE WHEN RUNNING_WEIGHT <= 1000 THEN 'Y' ELSE 'N' END AS INSIDE_LIMIT
+FROM 
+QUEUE
+)
+WHERE INSIDE_LIMIT = 'Y'
+)
+
+SELECT PERSON_NAME FROM QUEUE WHERE TURN = (SELECT TURN FROM FINAL_TURN) ; 
