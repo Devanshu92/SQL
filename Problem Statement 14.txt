@@ -1,0 +1,101 @@
+/*
+Question - Write a query to find number of gold medal per swimmer for swimmer who won only gold medals
+
++--+------+------+-------+--------+--------+
+id|	event|	year|	gold|	silver|	bronze
+1|	100m|	2016|	Amthhew Mcgarray|	donald|	barbara|
+2|	200m|	2016|	Nichole|	Alvaro Eaton|	janet Smith|
+3|	500m|	2016|	Charles|	Nichole|	Susana|
+4|	100m|	2016|	Ronald|	maria|	paula|
+5|	200m|	2016|	Alfred|	carol|	Steven|
+6|	500m|	2016|	Nichole|	Alfred|	Brandon|
+7|	100m|	2016|	Charles|	Dennis|	Susana|
+8|	200m|	2016|	Thomas|	Dawn|	catherine|
+9|	500m|	2016|	Thomas|	Dennis|	paula|
+10|	100m|	2016|	Charles|	Dennis|	Susana|
+11|	200m|	2016|	jessica|	Donald|	Stefeney|
+12|	500m|	2016|	Thomas|	Steven|	Catherine|
++--+------+------+-------+--------+--------+
+
+Output : 
++------+-----------+
+SWIMMER|	NUM_OF_GOLD|
+jessica|	1|
+Thomas|	3|
+Ronald|	1|
+Amthhew Mcgarray|	1|
+Charles|	3|
++------+-----------+
+*/
+
+CREATE TABLE EVENTS (
+ID INT,
+EVENT VARCHAR(255),
+YEAR INT,
+GOLD VARCHAR(255),
+SILVER VARCHAR(255),
+BRONZE VARCHAR(255)
+);
+
+INSERT INTO EVENTS VALUES
+(1,'100m',2016, 'Amthhew Mcgarray','donald','barbara'),
+(2,'200m',2016, 'Nichole','Alvaro Eaton','janet Smith'),
+(3,'500m',2016, 'Charles','Nichole','Susana'),
+(4,'100m',2016, 'Ronald','maria','paula'),
+(5,'200m',2016, 'Alfred','carol','Steven'),
+(6,'500m',2016, 'Nichole','Alfred','Brandon'),
+(7,'100m',2016, 'Charles','Dennis','Susana'),
+(8,'200m',2016, 'Thomas','Dawn','catherine'),
+(9,'500m',2016, 'Thomas','Dennis','paula'),
+(10,'100m',2016, 'Charles','Dennis','Susana'),
+(11,'200m',2016, 'jessica','Donald','Stefeney'),
+(12,'500m',2016,'Thomas','Steven','Catherine');
+
+--- Solution 1 ----- 
+WITH NOT_GOLD AS
+(
+SELECT DISTINCT A.GOLD
+FROM EVENTS A
+INNER JOIN EVENTS B 
+ON A.GOLD = B.SILVER
+UNION ALL 
+--- UNION ALL IS A FASTER OPERATION COMPARED TO UNION AS UNION REMOVES DUPLICATE AND UNION ALL DOESN'T, IN THIS EXAMPLE BOTH WORKS AS DATASET IS SMALL
+SELECT DISTINCT A.GOLD
+FROM EVENTS A
+INNER JOIN EVENTS B 
+ON A.GOLD = B.BRONZE 
+)
+
+SELECT GOLD AS SWIMMER,COUNT(*) AS NUM_OF_GOLD
+FROM EVENTS 
+WHERE GOLD NOT IN (SELECT * FROM NOT_GOLD)
+GROUP BY 1 
+
+---- Solution 2 ----
+
+SELECT GOLD AS SWIMMER,
+COUNT(*) AS NUM_OF_GOLD
+FROM EVENTS 
+WHERE
+GOLD NOT IN (SELECT SILVER FROM EVENTS GROUP BY 1)
+AND GOLD NOT IN (SELECT BRONZE FROM EVENTS GROUP BY 1)
+GROUP BY 1
+ORDER BY 1;
+
+
+---- SOLUTION 3-------------
+WITH CTE AS
+(
+SELECT GOLD AS SWIMMER,'GOLD' AS MEDAL_TYPE FROM EVENTS
+UNION ALL
+SELECT SILVER AS SWIMMER, 'SILVER' AS MEDAL_TYPE FROM EVENTS
+UNION ALL
+SELECT BRONZE AS SWIMMER, 'BRONZE' AS MEDAL_TYPE FROM EVENTS
+)
+
+SELECT SWIMMER, COUNT(*) AS NUM_OF_GOLD,
+-- COUNT(DISTINCT MEDAL_TYPE) AS DISTINCT_MEDAL,MAX(MEDAL_TYPE)
+FROM CTE
+GROUP BY 1
+HAVING COUNT(DISTINCT MEDAL_TYPE) = 1 -- ENSURES ONLY 1 MEDAL IS WON
+AND MAX(MEDAL_TYPE) = 'GOLD' -- ENSURES ONLY GOLD IS WON 
