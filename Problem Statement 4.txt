@@ -5,9 +5,17 @@ For Example : Devanshu word has 3 vowel
 Solution : 
 
  select
-    len('Devanshu') as len_char,
+    len('Anjay') as len_char,
     len(
         replace(replace(replace(replace(replace(
-            lower('Devanshu'), 'a', ''), 'e', ''), 'i', ''), 'o', ''), 'u', '')
+            lower('Anjay'), 'a', ''), 'e', ''), 'i', ''), 'o', ''), 'u', '')
     ) as len_char_without_vowel,
-    len_char-len_char_without_vowel as vowel_count
+     len_char-len_char_without_vowel as vowel_count,
+    case when lower('Anjay') like '%a%' then 1 else 0 end as a_count,
+    case when lower('Anjay') like '%e%' then 1 else 0 end as e_count,
+    case when lower('Anjay') like '%i%' then 1 else 0 end as i_count,
+    case when lower('Anjay') like '%o%' then 1 else 0 end as o_count,
+    case when lower('Anjay') like '%u%' then 1 else 0 end as u_count,
+    a_count + e_count + i_count + o_count + u_count as total_unique_vowel_count
+   
+
