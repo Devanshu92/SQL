@@ -79,7 +79,7 @@ FROM A RIGHT JOIN B ON A.ID = B.ID
 
 SELECT COUNT(*)
 FROM A FULL OUTER JOIN B ON A.ID = B.ID
--- ANS - 4X,2Y,1P,1Q,2Z,1R
+-- ANS - 11, 4X,2Y,1P,1Q,2Z,1R
 
 Follow-up question, will output change,if there is another row with id having Null value in both TableA as well as TableB.
 Answer: No impact on A JOIN B
