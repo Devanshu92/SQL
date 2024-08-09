@@ -1,0 +1,48 @@
+--- Write a SQL to show by Geography -------
+
+Input Table - PLAYER_LOCATION
+
++----------+-------------+
+| Name     | City        | 
++----------+-------------+
+| Sachin   | Mumbai      | 
+| Virat    | Delhi       |
+| Rahul    | Bangalore   | 
+| Rohit    | Mumbai      | 
+| Mayank   | Bangalore   | 
++----------+-------------+
+
+Output
++----------+-------------+----------+
+| Bangalore| Mumabi      |  Delhi   | 
++----------+-------------+----------+
+| Mayank   | Rohit       |  Virat   | 
+| Rahul    | Sachin      |          | 
++----------+-------------+----------+
+
+DROP TABLE IF EXISTS PLAYERS_LOCATION;
+CREATE TABLE PLAYERS_LOCATION
+(
+NAME VARCHAR(20),
+CITY VARCHAR(20)
+);
+
+
+INSERT INTO PLAYERS_LOCATION
+VALUES ('SACHIN','MUMBAI'),('VIRAT','DELHI') , ('RAHUL','BANGALORE'),('ROHIT','MUMBAI'),('MAYANK','BANGALORE');
+
+----- Solution 1 --------
+
+SELECT
+PLAYER_GROUP,
+MAX(CASE WHEN CITY = 'BANGALORE' THEN NAME END)AS BANGALORE,
+MAX(CASE WHEN CITY = 'MUMBAI' THEN NAME END) AS MUMBAI,
+MAX(CASE WHEN CITY = 'DELHI' THEN NAME END) AS DELHI
+FROM
+(
+SELECT
+*,
+ROW_NUMBER() OVER(PARTITION BY CITY ORDER BY NAME ASC) AS PLAYER_GROUP
+FROM PLAYERS_LOCATION
+) A
+GROUP BY PLAYER_GROUP
