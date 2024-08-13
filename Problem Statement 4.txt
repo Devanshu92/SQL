@@ -17,5 +17,7 @@ Solution :
     case when lower('Anjay') like '%o%' then 1 else 0 end as o_count,
     case when lower('Anjay') like '%u%' then 1 else 0 end as u_count,
     a_count + e_count + i_count + o_count + u_count as total_unique_vowel_count
+
+
    
 
